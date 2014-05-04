@@ -21,6 +21,10 @@
     $('#anneal').on('click', function(event) {
       event.preventDefault();
       
+      if ($('#anneal_progress').length > 0) {
+        return false;
+      }
+
       $('<div id="anneal_progress" class="progress progress-striped active"><div class="progress-bar" role="progressbar" style="width: 0%"></div></div>').insertBefore("#notice");
 
       evtSource = new EventSource($(this).attr('href'));
