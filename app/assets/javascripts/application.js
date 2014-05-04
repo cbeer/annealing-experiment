@@ -15,3 +15,28 @@
 //= require turbolinks
 //= require bootstrap
 //= require_tree .
+
+(function($) {
+  function bind_anneal_callback() {
+    $('#anneal').on('click', function(event) {
+      event.preventDefault();
+      
+      $('<div id="anneal_progress" class="progress progress-striped active"><div class="progress-bar" role="progressbar" style="width: 100%"></div></div>').insertBefore("#notice");
+
+      evtSource = new EventSource($(this).attr('href'));
+
+      evtSource.addEventListener('info', function(e) {
+        $('#anneal_progress > .progress-bar').text(e.data);
+      });
+      
+      evtSource.addEventListener('done', function(e) {
+        evtSource.close();
+        window.location.reload();
+      });
+      
+      return;
+    });
+  }
+  $(document).ready(bind_anneal_callback);
+  $(document).on('page:load', bind_anneal_callback)
+})(jQuery)

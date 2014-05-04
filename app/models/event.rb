@@ -6,6 +6,10 @@ class Event < ActiveRecord::Base
   has_many :votes, dependent: :destroy
   has_many :users, through: :votes
   
+  def clone
+    self.class.new attributes.except('id').merge(event: parent)
+  end
+  
   def parent
     event || self
   end

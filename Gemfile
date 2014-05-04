@@ -44,6 +44,9 @@ gem 'devise'
 gem 'omniauth-github'
 gem 'bootstrap-sass'
 gem 'bootstrap_form'
+group :development do
+  gem 'puma'
+end
 
 group :test do
   gem 'rspec-rails'
