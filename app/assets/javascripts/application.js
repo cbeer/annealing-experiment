@@ -21,13 +21,24 @@
     $('#anneal').on('click', function(event) {
       event.preventDefault();
       
-      $('<div id="anneal_progress" class="progress progress-striped active"><div class="progress-bar" role="progressbar" style="width: 100%"></div></div>').insertBefore("#notice");
+      $('<div id="anneal_progress" class="progress progress-striped active"><div class="progress-bar" role="progressbar" style="width: 0%"></div></div>').insertBefore("#notice");
 
       evtSource = new EventSource($(this).attr('href'));
 
       evtSource.addEventListener('info', function(e) {
-        $('#anneal_progress > .progress-bar').text(e.data);
+        var matches = e.data.match(/Iteration (\d+)/);
+        if (typeof matches[1] != "undefined") {
+          $('#anneal_progress > .progress-bar').css('width', 100*(matches[1]/2500) + "%");
+        }
       });
+      
+      evtSource.addEventListener('best', function(e) {
+        var matches = e.data.match(/energy (.*):/);
+        if (typeof matches[1] != "undefined") {
+          $('#anneal_progress > .progress-bar').text("Energy: " + Math.round(matches[1]));
+        }
+      });
+      
       
       evtSource.addEventListener('done', function(e) {
         evtSource.close();

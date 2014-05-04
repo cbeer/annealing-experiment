@@ -50,36 +50,39 @@ class Schedule < ActiveRecord::Base
     
     # time
     events.each do |e|
-      if e.time < starts_at
+      if e.time && e.time < starts_at
         score += (starts_at - e.time) / 15
       end
       
-      if e.time > ends_at
+      if e.time && e.time > ends_at
         score += (e.time - ends_at) / 15
       end
     end
     
     r = parent.rooms
     # compactness
-    times = events.map { |x| x.time }
-    t = times.min
-    while t <= times.max
-      evs = events.select { |e| e.time == t }
-      if evs.empty?
-        # if we have an entirely blank spot, that's bad.
-        score += 100
-      else
-        # if we have unused rooms.. 
-        score += 10*(r.length - evs.length)
-        
-        # if we've double-booked
-        needs = evs.map { |x| (x.needs || "").split(",") }.flatten.compact
-        if needs.uniq.length < needs.length
-           score += 1000
+    times = events.map { |x| x.time }.compact
+    
+    unless times.empty?
+      t = times.min
+      while t <= times.max
+        evs = events.select { |e| e.time == t }
+        if evs.empty?
+          # if we have an entirely blank spot, that's bad.
+          score += 100
+        else
+          # if we have unused rooms.. 
+          score += 10*(r.length - evs.length)
+          
+          # if we've double-booked
+          needs = evs.map { |x| (x.needs || "").split(",") }.flatten.compact
+          if needs.uniq.length < needs.length
+             score += 1000
+          end
         end
+        
+        t += 1.hour
       end
-      
-      t += 1.hour
     end
 
     score

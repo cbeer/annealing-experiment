@@ -23,12 +23,16 @@ class AnnealController < ApplicationController
       def info(msg)
         return unless @log_to
         
-        if msg =~ /^Iteration/
+        case msg
+        when /^Iteration/
           @log_to.write("event: info\n")
-          @log_to.write("data: ")
-          @log_to.write(msg)
-          @log_to.write("\n\n")
+        when /^New best/
+          @log_to.write("event: best\n")
         end
+        
+        @log_to.write("data: ")
+        @log_to.write(msg)
+        @log_to.write("\n\n")    
       end  
     end.new(log_to)
   end
