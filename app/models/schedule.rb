@@ -211,7 +211,7 @@ class Schedule < ActiveRecord::Base
     ev1.room_id = (parent.cached_room_ids - [ev1.room_id]).shuffle.first
 
     ev2 = s.events.select { |x| x.room_id == ev1.room_id }.map { |x| x.time }
-    ev1.time = ((s.session_times - ev2) + [(ev2.max + 1.hour).beginning_of_hour]).shuffle.first
+    ev1.time = ((s.session_times - ev2) + [(ev2.max + 1.hour).beginning_of_hour, (ev2.min - 1.hour).beginning_of_hour]).shuffle.first
     s
   end
 end
