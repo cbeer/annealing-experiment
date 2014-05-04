@@ -1,0 +1,26 @@
+<% if event %>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <%= (l(event.time, format: :short) if event.time) || "TBA" %> <strong><%= event.title %></strong>
+  </div>
+  <div class="panel-body"> 
+    <dl>   
+    <% if event.needs %><dt>Needs:</dt><dd><%= event.needs %></dd><% end %>
+    <% if event.votes %>
+    <dt>Votes</dt>
+      <ul>
+        <% event.votes.each do |v| %>
+          <%= v.user.email %> (<%= v.vote %>)
+        <% end %>
+      </ul>
+    </dt>
+    <% end %>
+  </dl>
+    
+  </div>
+  <div class="panel-footer clearfix">
+    <%= link_to 'Edit', edit_schedule_event_path(@schedule, event) %>
+    <%= link_to 'Vote', vote_schedule_event_path(@schedule, event), method: 'post', class: 'pull-right' %>
+  </div>
+</div>
+<% end %>

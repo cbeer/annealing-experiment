@@ -1,10 +1,20 @@
 Rails.application.routes.draw do
   devise_for :users
+  resources :schedules do
+    resources :events do
+      member do
+        post 'vote'
+        delete 'vote' => 'events#unvote'
+      end
+    end
+    
+    resources :rooms
+  end
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
   # You can have the root of your site routed with "root"
-  # root 'welcome#index'
+  root 'schedules#index'
 
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'

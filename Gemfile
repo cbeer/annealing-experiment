@@ -43,6 +43,7 @@ gem 'rails_12factor'
 gem 'devise'
 gem 'omniauth-github'
 gem 'bootstrap-sass'
+gem 'bootstrap_form'
 
 group :test do
   gem 'rspec-rails'
