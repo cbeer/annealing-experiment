@@ -44,7 +44,7 @@ class Schedule < ActiveRecord::Base
           score -= scores.max
         else
           # users don't like sessions they voted for scheduled at the same time
-          score += 10*scores.sum
+          score += 2**scores.sum
         end
       end
     end
