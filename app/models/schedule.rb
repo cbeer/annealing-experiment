@@ -49,14 +49,25 @@ class Schedule < ActiveRecord::Base
       end
     end
     
+    # small penalty for making people switch rooms
+    events.group_by(&:room_id).each do |t, evs|
+      users = evs.sort_by(&:time).map do |e|
+        e.parent.votes.select { |x| x.event_id == e }.map { |x| x.user_id }
+      end
+      
+      users.each_with_index do |u, i|
+        score += 10 * ((u - (u[i+1] || [])).length / parent.users.length)
+      end
+    end
+    
     # time
     events.each do |e|
       if e.time && e.time < starts_at
-        score += (starts_at - e.time) / 15
+        score += (starts_at - e.time) / 15.0
       end
       
       if e.time && e.time > ends_at
-        score += (e.time - ends_at) / 15
+        score += (e.time - ends_at) / 15.0
       end
     end
 
@@ -72,8 +83,8 @@ class Schedule < ActiveRecord::Base
           # if we have an entirely blank spot, that's bad.
           score += 100
         else
-          # if we have unused rooms.. 
-          score += 10*(r.length - evs.length)
+          # if we have unused rooms, we might be able to do better
+          score += 5*(r.length - evs.length)
           
           # if we've double-booked
           needs = evs.map { |x| (x.needs || "").split(",") }.flatten.compact
