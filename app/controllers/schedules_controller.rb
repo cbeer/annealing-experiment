@@ -1,5 +1,5 @@
 class SchedulesController < ApplicationController
-  before_action :set_schedule, only: [:show, :edit, :update, :destroy, :anneal]
+  before_action :set_schedule, only: [:show, :edit, :update, :destroy, :anneal, :reset]
 
   # GET /schedules
   # GET /schedules.json
@@ -61,6 +61,15 @@ class SchedulesController < ApplicationController
     @schedule.destroy
     respond_to do |format|
       format.html { redirect_to schedules_url, notice: 'Schedule was successfully destroyed.' }
+      format.json { head :no_content }
+    end
+  end
+  
+  def reset
+    @schedule.unassign_all_events
+    
+    respond_to do |format|
+      format.html { redirect_to @schedule }
       format.json { head :no_content }
     end
   end

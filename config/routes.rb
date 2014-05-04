@@ -12,6 +12,7 @@ Rails.application.routes.draw do
     
     member do
       get 'anneal' => 'anneal#schedule'
+      post 'reset'
     end
   end
   # The priority is based upon order of creation: first created -> highest priority.

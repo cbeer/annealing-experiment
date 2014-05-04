@@ -128,6 +128,14 @@ class Schedule < ActiveRecord::Base
     ts
   end
   
+  def unassign_all_events
+    events.each do |e|
+      e.time = nil
+      e.room_id = nil
+      e.save
+    end
+  end
+  
   private
   def initialize_times_and_rooms
     events.select { |x| x.room_id.nil? }.each do |e| 
