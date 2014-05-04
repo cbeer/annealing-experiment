@@ -18,9 +18,13 @@ class Schedule < ActiveRecord::Base
     best.events.each do |e|
       p = events.select { |x| x.id == e.parent.id }.first
       p.time = e.time
-      p.room = e.room
+      p.room_id = e.room_id
     end
     self
+  end
+  
+  def cached_room_ids
+    @cached_room_ids ||= room_ids
   end
 
   def energy
@@ -34,7 +38,6 @@ class Schedule < ActiveRecord::Base
         end.compact
         
         if scores.empty?
-          score -= 1
           # don't care
         elsif scores.length == 1 
           # no session conflicts
@@ -56,8 +59,8 @@ class Schedule < ActiveRecord::Base
         score += (e.time - ends_at) / 15
       end
     end
-    
-    r = parent.rooms
+
+    r = parent.cached_room_ids
     # compactness
     times = events.map { |x| x.time }.compact
     
@@ -79,7 +82,7 @@ class Schedule < ActiveRecord::Base
           end
         end
         
-        t += 1.hour
+        t = (t + 1.hour).beginning_of_hour
       end
     end
 
@@ -91,9 +94,7 @@ class Schedule < ActiveRecord::Base
     c = [:swap_room, 
          :swap_earlier, 
          :swap_later, 
-         :switch_track, 
-         :shift_room_time, 
-         :shift_time_forward].shuffle
+         :switch_track].shuffle
     while n.nil? and !c.empty?
       n = send(c.pop)
     end
@@ -115,22 +116,33 @@ class Schedule < ActiveRecord::Base
       "\n====="
   end
   
+  def session_times
+    ts = []
+    
+    t = starts_at
+    while t <= ends_at
+      ts << t
+      t = (t + 1.hour).beginning_of_hour
+    end
+
+    ts
+  end
+  
   private
   def initialize_times_and_rooms
-    events.select { |x| x.room.nil? }.each do |e| 
-      e.room = parent.rooms.shuffle.first
+    events.select { |x| x.room_id.nil? }.each do |e| 
+      e.room_id = parent.cached_room_ids.shuffle.first
     end
 
     latest_by_room = {}
 
-    events_by_room = events.group_by { |x| x.room }.each do |track, es|
+    events_by_room = events.group_by { |x| x.room_id }.each do |track, es|
       latest_by_room[track] = es.reject { |x| x.time.nil? }.map { |x| x.time }.max
     end
 
-    events.select { |x| x.time.nil? }.group_by { |x| x.room }.each do |track, es|
-      
+    events.select { |x| x.time.nil? }.group_by { |x| x.room_id }.each do |track, es|
       es.each_with_index do |e,i|
-        e.time = latest_by_room[track] || (Time.now.beginning_of_day + 8.hours) + 1 + i.hours
+        e.time = latest_by_room[track] || ((Time.now.beginning_of_day + 8.hours) + 1 + i.hours).beginning_of_hour
       end
     end
   end
@@ -143,13 +155,13 @@ class Schedule < ActiveRecord::Base
     s = clone
     
     ev1 = s.events.shuffle.first
-    l = (parent.rooms - [ev1.room]).shuffle.first
-    ev2 = s.events.select { |x| x.time == ev1.time }.select { |x| x.room == l }.first
+    l = (parent.cached_room_ids - [ev1.room_id]).shuffle.first
+    ev2 = s.events.select { |x| x.time == ev1.time }.select { |x| x.room_id == l }.first
     
     if ev2.nil?
-      ev1.room = l
+      ev1.room_id = l
     else
-      ev1.room, ev2.room = ev2.room, ev1.room
+      ev1.room_id, ev2.room_id = ev2.room_id, ev1.room_id
     end
 
     s
@@ -159,10 +171,10 @@ class Schedule < ActiveRecord::Base
     s = clone
     
     ev1 = s.events.shuffle.first
-    ev2 = s.events.select { |x| x.room == ev1.room }.select { |x| x.time == (ev1.time - 1.hour) }.first
+    ev2 = s.events.select { |x| x.room_id == ev1.room_id }.select { |x| x.time == (ev1.time - 1.hour).beginning_of_hour }.first
 
     if ev2.nil?
-      ev1.time = ev1.time - 1.hour
+      ev1.time = (ev1.time - 1.hour).beginning_of_hour
     else
       ev1.time, ev2.time = ev2.time, ev1.time
     end
@@ -173,10 +185,10 @@ class Schedule < ActiveRecord::Base
     s = clone
     
     ev1 = s.events.shuffle.first
-    ev2 = s.events.select { |x| x.room == ev1.room}.select { |x| x.time == (ev1.time + 1.hour) }.first
+    ev2 = s.events.select { |x| x.room_id == ev1.room_id }.select { |x| x.time == (ev1.time + 1.hour).beginning_of_hour }.first
     
     if ev2.nil?
-      ev1.time = ev1.time + 1.hour
+      ev1.time = (ev1.time + 1.hour).beginning_of_hour
     else
       ev1.time, ev2.time = ev2.time, ev1.time
     end
@@ -188,42 +200,10 @@ class Schedule < ActiveRecord::Base
     s = clone
     
     ev1 = s.events.shuffle.first
-    ev1.room = (parent.rooms - [ev1.room]).shuffle.first
-    
-    ev2 = s.events.select { |x| x.room == ev1.room }.map { |x| x.time }.max
-    ev1.time = ev2 + 1.hour
-    s
-  end
-  
-  def shift_room_time
-    s = clone
-    l = parent.rooms.shuffle.select
-    dir = rand(-1..1)
-    s.events.select { |x| x.room == l }.each do |e|
-      e.time += 1.hour * dir
-    end
-    s
-  end
-  
-  def shift_time_forward
-    s = clone
-    t = s.events.shuffle.first.time
-    
-    s.events.select { |x| x.time >= t }.each do |e|
-      e.time += 1.hour
-    end
+    ev1.room_id = (parent.cached_room_ids - [ev1.room_id]).shuffle.first
 
-    s
-  end
-  
-  def shift_time_backwards
-    s = clone
-    t = s.events.shuffle.first.time
-    
-    s.events.select { |x| x.time <= t }.each do |e|
-      e.time -= 1.hour
-    end
-
+    ev2 = s.events.select { |x| x.room_id == ev1.room_id }.map { |x| x.time }
+    ev1.time = ((s.session_times - ev2) + [(ev2.max + 1.hour).beginning_of_hour]).shuffle.first
     s
   end
 end

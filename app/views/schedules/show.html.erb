@@ -15,18 +15,18 @@
   <% end %>
 </div>
 
-<% t = @schedule.starts_at - 3.hours %>
-<% while t <= @schedule.ends_at + 3.hours %>
+<% t = (@schedule.starts_at - 3.hours).beginning_of_hour %>
+<% while t <= (@schedule.ends_at + 3.hours).beginning_of_hour %>
   <div class="row" data-time="<%= l(t, format: :short) %>">
     <% @schedule.rooms.sort_by(&:name).each do |r| %>
       <div data-room-id="<%= r.id %>" class="col-room col-md-<%= 12 / @schedule.rooms.length %>">
 
-      <% e = @schedule.events.select { |x| x.time >= t - 5.minutes and x.time <= t + 5.minutes and x.room == r }.first %>
+      <% e = @schedule.events.select { |x| x.time == t and x.room == r }.first %>
       <%= render partial: 'event', object: e if e  %>
       </div>
     <% end %>
   </div>
-  <% t += 1.hour %>
+  <% t = (t + 1.hour).beginning_of_hour %>
 <% end %>
 
 <% unassigned = @schedule.events.select { |x| x.room.nil? } %>
