@@ -28,14 +28,14 @@
       evtSource.addEventListener('info', function(e) {
         var matches = e.data.match(/Iteration (\d+)/);
         if (typeof matches[1] != "undefined") {
-          $('#anneal_progress > .progress-bar').css('width', 100*(matches[1]/2500) + "%");
+          $('#anneal_progress > .progress-bar').css('width', 100*(matches[1]/2500) + "%").text(Math.round(100*(matches[1]/2500)) + "%");
         }
       });
       
       evtSource.addEventListener('best', function(e) {
         var matches = e.data.match(/energy (.*):/);
         if (typeof matches[1] != "undefined") {
-          $('#anneal_progress > .progress-bar').text("Energy: " + Math.round(matches[1]));
+          $('.energy').text("energy: " + Math.round(matches[1]));
         }
       });
       

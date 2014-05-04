@@ -5,7 +5,7 @@
 <li><%= link_to 'Anneal', anneal_schedule_path(@schedule), id: 'anneal' %></li>
 </div>
 <p id="notice"><%= notice %></p>
-<small class="pull-right">energy: <%= number_with_precision @schedule.energy, precision: 0, delimiter: ',' %></small>
+<small class="pull-right energy">energy: <%= number_with_precision @schedule.energy, precision: 0, delimiter: ',' %></small>
 <h1><%= @schedule.title %></h1>
 <div class="row" id="rooms">
   <% @schedule.rooms.sort_by(&:name).each do |r| %>
