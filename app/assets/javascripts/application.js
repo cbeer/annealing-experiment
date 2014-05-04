@@ -45,11 +45,17 @@
       
       evtSource.addEventListener('best_state', function(e) {
         var events = $.parseJSON(e.data);
+        
+        $('.event.panel-success').removeClass('panel-success');
         $.each(events, function(i,e) {
           var $ev_div = $('.event[data-event-id="' + e.event_id + '"]');
+          if ($ev_div.has('[data-room-id="' + e.room_id + '"]') && $ev_div.find('time').text() == e.localized_time) {
+            return;
+          }
           $ev_div.find('time').text(e.localized_time);
           var cell = $('.row[data-time="' + e.localized_time + '"]').find('.col-room[data-room-id="' + e.room_id + '"]');
           cell.append($ev_div);
+          $ev_div.addClass('panel-success');
         });
       });
       
@@ -57,6 +63,7 @@
       
       evtSource.addEventListener('done', function(e) {
         evtSource.close();
+        $('.event.panel-success').removeClass('panel-success');
         $('#anneal_progress').remove();
         window.location.reload();
       });

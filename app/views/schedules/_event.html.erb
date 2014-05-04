@@ -1,7 +1,7 @@
 <% if event %>
-<div class="event panel panel-default" data-event-id="<%= event.id %>">
+<div class="event panel panel-default" data-event-id="<%= event.id %>" data-room-id="<%= event.room_id %>">
   <div class="panel-heading">
-    <time><%= (l(event.time, format: :short) if event.time) || "TBA" %></time> <strong><%= event.title %></strong>
+    <time><%= (event.localized_time if event.time) || "TBA" %></time> <strong><%= event.title %></strong>
   </div>
   <div class="panel-body"> 
     <dl>   
@@ -10,7 +10,7 @@
     <dt>Votes</dt>
       <ul>
         <% event.votes.each do |v| %>
-          <%= v.user.email %> (<%= v.vote %>)
+          <li><%= content_tag :span, v.vote, class: 'badge' %> <%= v.user.email %></li>
         <% end %>
       </ul>
     </dt>
