@@ -42,6 +42,7 @@ gem 'annealer'
 gem 'rails_12factor'
 gem 'devise'
 gem 'omniauth-github'
+gem 'bootstrap-sass'
 
 group :test do
   gem 'rspec-rails'
