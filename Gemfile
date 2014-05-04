@@ -38,7 +38,7 @@ gem 'spring',        group: :development
 # Use debugger
 # gem 'debugger', group: [:development, :test]
 
-gem 'annealer'
+gem 'annealer', github: 'cbeer/annealer'
 gem 'rails_12factor'
 gem 'devise'
 gem 'omniauth-github'

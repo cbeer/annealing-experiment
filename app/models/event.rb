@@ -13,4 +13,8 @@ class Event < ActiveRecord::Base
   def parent
     event || self
   end
+  
+  def localized_time
+    I18n.l time, format: :short
+  end
 end

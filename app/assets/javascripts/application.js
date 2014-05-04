@@ -39,9 +39,21 @@
         }
       });
       
+      evtSource.addEventListener('best_state', function(e) {
+        var events = $.parseJSON(e.data);
+        $.each(events, function(i,e) {
+          var $ev_div = $('.event[data-event-id="' + e.event_id + '"]');
+          $ev_div.find('time').text(e.localized_time);
+          var cell = $('.row[data-time="' + e.localized_time + '"]').find('.col-room[data-room-id="' + e.room_id + '"]');
+          cell.append($ev_div);
+        });
+      });
+      
+      
       
       evtSource.addEventListener('done', function(e) {
         evtSource.close();
+        $('#anneal_progress').remove();
         window.location.reload();
       });
       

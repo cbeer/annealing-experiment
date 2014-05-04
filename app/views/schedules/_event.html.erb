@@ -1,7 +1,7 @@
 <% if event %>
-<div class="panel panel-default">
+<div class="event panel panel-default" data-event-id="<%= event.id %>">
   <div class="panel-heading">
-    <%= (l(event.time, format: :short) if event.time) || "TBA" %> <strong><%= event.title %></strong>
+    <time><%= (l(event.time, format: :short) if event.time) || "TBA" %></time> <strong><%= event.title %></strong>
   </div>
   <div class="panel-body"> 
     <dl>   

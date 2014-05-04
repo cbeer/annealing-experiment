@@ -12,16 +12,14 @@ class Schedule < ActiveRecord::Base
     events.map { |e| e.parent.users.to_a }.flatten.uniq
   end
   
-  def anneal options = {}
+  def anneal options = {}, &block
     initialize_times_and_rooms
-    best = Annealer.new(options).anneal(self)
+    best = Annealer.new(options).anneal(self, &block)
     best.events.each do |e|
       p = events.select { |x| x.id == e.parent.id }.first
       p.time = e.time
       p.room = e.room
-      p.save
     end
-    reload
     self
   end
 

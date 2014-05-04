@@ -1,3 +1,9 @@
+GIT
+  remote: git://github.com/cbeer/annealer.git
+  revision: 963370b26491009211428f9ca1d86243fa444186
+  specs:
+    annealer (0.2)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -27,7 +33,6 @@ GEM
       minitest (~> 5.1)
       thread_safe (~> 0.1)
       tzinfo (~> 1.1)
-    annealer (0.2)
     arel (5.0.1.20140414130214)
     bcrypt (3.1.7)
     bootstrap-sass (3.1.1.1)
@@ -171,7 +176,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  annealer
+  annealer!
   bootstrap-sass
   bootstrap_form
   coffee-rails (~> 4.0.0)

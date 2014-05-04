@@ -7,23 +7,26 @@
 <p id="notice"><%= notice %></p>
 <small class="pull-right">energy: <%= number_with_precision @schedule.energy, precision: 0, delimiter: ',' %></small>
 <h1><%= @schedule.title %></h1>
-<div class="row">
+<div class="row" id="rooms">
   <% @schedule.rooms.sort_by(&:name).each do |r| %>
-    <div class="col-md-<%= 12 / @schedule.rooms.length %>">
+    <div class="col-md-<%= 12 / @schedule.rooms.length %>" data-room_id="<%= r.id %>">
       <h2><%= r.name %><small class="pull-right"><%= link_to 'edit', [:edit, @schedule, r] %></small></h2>
     </div>
   <% end %>
 </div>
 
-<% @schedule.events.group_by { |x| x.time }.sort_by { |time, events| time }.each do |t, events| %>
-  <div class="row">
+<% t = @schedule.starts_at - 3.hours %>
+<% while t <= @schedule.ends_at + 3.hours %>
+  <div class="row" data-time="<%= l(t, format: :short) %>">
     <% @schedule.rooms.sort_by(&:name).each do |r| %>
-      <div class="col-md-<%= 12 / @schedule.rooms.length %>">
-        <% e = events.select { |x| x.room == r }.first %>
-        <%= render partial: 'event', object: e if e  %>
+      <div data-room-id="<%= r.id %>" class="col-room col-md-<%= 12 / @schedule.rooms.length %>">
+
+      <% e = @schedule.events.select { |x| x.time >= t - 5.minutes and x.time <= t + 5.minutes and x.room == r }.first %>
+      <%= render partial: 'event', object: e if e  %>
       </div>
     <% end %>
   </div>
+  <% t += 1.hour %>
 <% end %>
 
 <% unassigned = @schedule.events.select { |x| x.room.nil? } %>

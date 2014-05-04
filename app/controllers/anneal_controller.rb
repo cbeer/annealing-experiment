@@ -6,8 +6,16 @@ class AnnealController < ApplicationController
     
     response.headers['Content-Type'] = 'text/event-stream'
   
-    @schedule.anneal logger: streaming_logger(response.stream), max_iter: 2500, log_progress_frequency: 10
-  
+    @schedule.anneal logger: streaming_logger(response.stream), max_iter: 2500, log_progress_frequency: 10 do |best_state|
+      response.stream.write "event: best_state\n"
+      response.stream.write "data: #{best_state.events.to_json(only: [:event_id, :room_id], methods: [:localized_time]) }\n\n"
+    end
+    
+    response.stream.write "event: best_state\n"
+    response.stream.write "data: #{@schedule.events.to_json(only: [:event_id, :room_id], methods: [:localized_time]) }\n\n"
+
+    @schedule.events.each { |e| e.save }
+
     response.stream.write("event: done\ndata: x\n\n")
     response.stream.close
   end
