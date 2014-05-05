@@ -57,7 +57,7 @@ class Schedule < ActiveRecord::Base
       
       users.each_with_index do |u, i|
         score += 10 * ((u - (u[i+1] || [])).length / parent.users.length)
-      end
+      end unless parent.users.empty?
     end
     
     # time
